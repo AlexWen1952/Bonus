@@ -1,46 +1,88 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
+import React, { useState } from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
 
-class Game extends React.Component {
- fetchData() {
-    fetch('https://api.thecatapi.com/v1/images/search')
-        .then(response => response.json()) // Parse JSON
-        .then(data => {
-            console.log(JSON.stringify(data));
+function fetchData(image_container, data_output, link) {
+  fetch(link)
+    .then((response) => response.json()) // Parse JSON
+    .then((data) => {
+      console.log(JSON.stringify(data));
 
-            // Process the data            
-            var item = data[0];
-            document.getElementById('image-id').textContent = "Image ID: " + item['id'];
-            document.getElementById('image-width').textContent = "Image Width: " + item['width'];
-            document.getElementById('image-height').textContent = "Image Height: " + item['height'];
+      // Process the data
+      var item = data[0];
 
-            var img = document.createElement('img');
-            img.src = item['url'];
-            document.getElementById('image-container').appendChild(img);
-        })
-        .catch(error => {
-            console.error('Error fetching data:', error);
-        });
+      data_output.render(
+        <MyData id={item["id"]} width={item["width"]} height={item["height"]} />
+      );
+
+      image_container.render(<MyImage url={item["url"]} />);
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
 }
 
- handleRefresh = () => {
-  document.getElementById('image-container').innerHTML = '';
-  this.fetchData();
-};
-
-// Call the fetchData function when the page loads
-  render() {
-    return (
-      <div>
-        {/* Your component content */}
-        <button onClick={this.handleRefresh}>Refresh</button>
-      </div>
-    );
-  }
+function MyData(props) {
+  return (
+    <section>
+      <p>Image ID: {props.id}</p>
+      <p>Image Width: {props.width}</p>
+      <p>Image Height: {props.height}</p>
+    </section>
+  );
 }
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<Game />);
+function MyImage(props) {
+  return <img src={props.url} alt="Description of the image" />;
+}
 
-  
+function MySelect(props) {
+  const data_output = ReactDOM.createRoot(
+    document.getElementById("data-output")
+  );
+  const image_container = ReactDOM.createRoot(
+    document.getElementById("image-container")
+  );
+
+  const [selectedOption, setSelectedOption] = useState(props.cat);
+  const [collectedOption, setCollectedOption] = useState("");
+
+  const handleChange = (event) => {
+    setSelectedOption(event.target.value);
+  };
+
+  const handleButtonClick = () => {
+    setCollectedOption(selectedOption);
+    console.log(selectedOption);
+    fetchData(image_container, data_output, selectedOption);
+  };
+
+  return (
+    <section>
+      <label>
+        Pick a Pet category and Refresh!
+        <hr />
+        <select
+          value={selectedOption}
+          onChange={handleChange}
+          defaultValue={props.cat}
+        >
+          <option value={props.cat}>Cat</option>
+          <option value={props.dog}>Dog</option>
+        </select>
+      </label>
+      <br />
+      <button className="button" onClick={handleButtonClick}>
+        Refresh
+      </button>
+    </section>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("select-container"));
+root.render(
+  <MySelect
+    cat="https://api.thecatapi.com/v1/images/search"
+    dog="https://api.thedogapi.com/v1/images/search"
+  />
+);
