@@ -15,7 +15,7 @@ function fetchData(image_container, data_output, link) {
         <MyData id={item["id"]} width={item["width"]} height={item["height"]} />
       );
 
-      image_container.render(<MyImage url={item["url"]} />);
+      image_container.render(<MyImage url={item["url"]} alt={item["id"]}/>);
     })
     .catch((error) => {
       console.error("Error fetching data:", error);
@@ -33,7 +33,7 @@ function MyData(props) {
 }
 
 function MyImage(props) {
-  return <img src={props.url} alt="Description of the image" />;
+  return <img src={props.url} alt={props.alt} />;
 }
 
 function MySelect(props) {
